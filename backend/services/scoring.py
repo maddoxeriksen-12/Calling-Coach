@@ -2,7 +2,13 @@ import os
 import json
 from openai import OpenAI
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+_client = None
+
+def get_client():
+    global _client
+    if _client is None:
+        _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    return _client
 
 POST_CALL_SCORING_PROMPT = """You are a strict sales coach evaluating a salesperson's performance in a practice call.
 
@@ -61,7 +67,7 @@ def score_full_session(transcript: list, product_data: dict, personality_type: s
         transcript=transcript_text,
     )
 
-    response = client.chat.completions.create(
+    response = get_client().chat.completions.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a strict sales performance evaluator. Return only valid JSON."},

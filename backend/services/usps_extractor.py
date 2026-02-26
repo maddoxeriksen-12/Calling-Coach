@@ -2,7 +2,13 @@ import os
 import json
 from openai import OpenAI
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+_client = None
+
+def get_client():
+    global _client
+    if _client is None:
+        _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    return _client
 
 EXTRACTION_PROMPT = """You are a sales training expert. Analyze the following product documentation and extract structured information for sales coaching.
 
@@ -42,7 +48,7 @@ Return ONLY valid JSON, no markdown fences."""
 
 
 def extract_usps(document_text: str) -> dict:
-    response = client.chat.completions.create(
+    response = get_client().chat.completions.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": "You return only valid JSON."},

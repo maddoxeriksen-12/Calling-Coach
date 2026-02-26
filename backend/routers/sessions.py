@@ -16,7 +16,15 @@ from services.personality import (
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
 VAPI_PRIVATE_KEY = os.getenv("VAPI_PRIVATE_KEY", "")
-WEBHOOK_BASE_URL = os.getenv("WEBHOOK_BASE_URL", "https://your-server.com")
+
+def get_webhook_base_url() -> str:
+    explicit = os.getenv("WEBHOOK_BASE_URL")
+    if explicit:
+        return explicit.rstrip("/")
+    railway_domain = os.getenv("RAILWAY_PUBLIC_DOMAIN")
+    if railway_domain:
+        return f"https://{railway_domain}"
+    return "https://your-server.com"
 
 
 class CreateSessionRequest(BaseModel):
@@ -111,7 +119,7 @@ def create_session(
             "voiceId": "burt",
         },
         "firstMessage": f"Hey, thanks for jumping on this call. I've got a few minutes — tell me what you've got. What is this product and why should I care?",
-        "serverUrl": f"{WEBHOOK_BASE_URL}/webhook/vapi",
+        "serverUrl": f"{get_webhook_base_url()}/webhook/vapi",
         "serverMessages": ["end-of-call-report", "tool-calls", "transcript", "status-update"],
         "stopSpeakingPlan": personality["vapi_stop_speaking_plan"],
         "endCallPhrases": ["goodbye", "end the session", "that's all"],

@@ -27,6 +27,9 @@ allowed_origins = [
 railway_public_domain = os.getenv("RAILWAY_PUBLIC_DOMAIN")
 if railway_public_domain:
     allowed_origins.append(f"https://{railway_public_domain}")
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    allowed_origins.append(frontend_url.rstrip("/"))
 
 app.add_middleware(
     CORSMiddleware,

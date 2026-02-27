@@ -31,8 +31,22 @@ frontend_url = os.getenv("FRONTEND_URL")
 if frontend_url:
     allowed_origins.append(frontend_url.rstrip("/"))
 
+allowed_origin_patterns = [
+    r"https://.*-maddox-eriksens-projects\.vercel\.app",
+    r"https://calling-coach.*\.vercel\.app",
+]
+
+from starlette.middleware.cors import CORSMiddleware as _CORSMiddleware
+import re
+
+class FlexibleCORSMiddleware(_CORSMiddleware):
+    def is_allowed_origin(self, origin: str) -> bool:
+        if super().is_allowed_origin(origin):
+            return True
+        return any(re.fullmatch(p, origin) for p in allowed_origin_patterns)
+
 app.add_middleware(
-    CORSMiddleware,
+    FlexibleCORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],

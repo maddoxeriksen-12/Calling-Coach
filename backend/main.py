@@ -20,35 +20,10 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Calling Coach API", version="1.0.0")
 
-allowed_origins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-]
-railway_public_domain = os.getenv("RAILWAY_PUBLIC_DOMAIN")
-if railway_public_domain:
-    allowed_origins.append(f"https://{railway_public_domain}")
-frontend_url = os.getenv("FRONTEND_URL")
-if frontend_url:
-    allowed_origins.append(frontend_url.rstrip("/"))
-
-allowed_origin_patterns = [
-    r"https://.*-maddox-eriksens-projects\.vercel\.app",
-    r"https://calling-coach.*\.vercel\.app",
-]
-
-from starlette.middleware.cors import CORSMiddleware as _CORSMiddleware
-import re
-
-class FlexibleCORSMiddleware(_CORSMiddleware):
-    def is_allowed_origin(self, origin: str) -> bool:
-        if super().is_allowed_origin(origin):
-            return True
-        return any(re.fullmatch(p, origin) for p in allowed_origin_patterns)
-
 app.add_middleware(
-    FlexibleCORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
